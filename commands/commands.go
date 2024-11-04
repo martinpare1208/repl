@@ -31,8 +31,13 @@ return map[string]CliCommand{
 	},
 	"map": {
 		Name: "map",
-		Desc: "map {optional: id} get information on location areas if no id is provided",
+		Desc: "get information on location areas",
 		Callback: getMap,
+	},
+	"mapb": {
+		Name: "mapb",
+		Desc: "go back a previous page",
+		Callback: getMapB,
 	},
 }
 }
@@ -69,5 +74,14 @@ func ReadCommand(command string) error {
 
 func getMap() (error) {
 	internal.GetLocations()
+	return nil
+}
+
+func getMapB() (error) {
+	err := internal.GetLocationsB()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return err
+	}
 	return nil
 }
