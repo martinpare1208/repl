@@ -14,14 +14,14 @@ type WrongCommandError struct {
 	Command string
 }
 
-var CommandsList = map[string]CliCommand{
-
+func getCommands() map[string]CliCommand{
+return map[string]CliCommand{
 	"help": {
 		Name: "help",
 		Desc: "display commands available",
 		Callback: GetHelp,
 	},
-
+}
 }
 
 func(c WrongCommandError) Error() string {
@@ -30,14 +30,18 @@ func(c WrongCommandError) Error() string {
 
 func GetHelp() (error) {
 
-	fmt.Println("Help successful")
+	fmt.Println("Commands below: ")
+	fmt.Println()
+	for _, c := range getCommands() {
+		fmt.Printf("%s: %s\n", c.Name, c.Desc)
+	}
 	return nil
 }
 
 func ReadCommand(command string) error {
-	for c := range CommandsList {
+	for c := range getCommands() {
 		if command == c {
-			CommandsList[command].Callback()
+			getCommands()[command].Callback()
 			return nil
 		} 
 	}
