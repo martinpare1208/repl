@@ -2,6 +2,7 @@ package commands
 
 import(
 	"fmt"
+	"os"
 )
 
 type CliCommand struct {
@@ -21,11 +22,22 @@ return map[string]CliCommand{
 		Desc: "display commands available",
 		Callback: GetHelp,
 	},
+	"exit": {
+		Name: "exit",
+		Desc: "exit the program",
+		Callback: ExitProgram,
+	},
 }
 }
 
 func(c WrongCommandError) Error() string {
 	return fmt.Sprintf("command: '%s' not found: ", c.Command)
+}
+
+func ExitProgram() (error) {
+	fmt.Println("Exiting Program.")
+	os.Exit(0)
+	return nil
 }
 
 func GetHelp() (error) {
