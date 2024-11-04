@@ -7,10 +7,11 @@ import (
 	"strings"
 
 	"github.com/martinpare1208/pokedexcli/commands"
+	
 )
 
 func main() {
-	
+
 	fmt.Println("Welcome!")
 	reader := bufio.NewScanner(os.Stdin)
 

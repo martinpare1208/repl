@@ -1,8 +1,10 @@
 package commands
 
-import(
+import (
 	"fmt"
 	"os"
+
+	"github.com/martinpare1208/pokedexcli/commands/internal"
 )
 
 type CliCommand struct {
@@ -26,6 +28,11 @@ return map[string]CliCommand{
 		Name: "exit",
 		Desc: "exit the program",
 		Callback: ExitProgram,
+	},
+	"map": {
+		Name: "map",
+		Desc: "map {optional: id} get information on location areas if no id is provided",
+		Callback: getMap,
 	},
 }
 }
@@ -58,4 +65,9 @@ func ReadCommand(command string) error {
 		} 
 	}
 	return WrongCommandError{Command: command}
+}
+
+func getMap() (error) {
+	internal.GetLocations()
+	return nil
 }
