@@ -43,6 +43,11 @@ return map[string]CliCommand{
 		Desc: "go back a previous page",
 		Callback: getMapB,
 	},
+	"explore": {
+		Name: "explore",
+		Desc: "explore an area",
+		Callback: getMapB,
+	},
 }
 }
 
@@ -77,7 +82,7 @@ func ReadCommand(command string, cfg *config.Cfg) error {
 }
 
 func getMap(cfg *config.Cfg) (error) {
-	pokeapi.GetLocations(cfg)
+	pokeapi.GetLocations(cfg, cfg.NextUrl)
 	return nil
 }
 
@@ -89,3 +94,4 @@ func getMapB(cfg *config.Cfg) (error) {
 	}
 	return nil
 }
+

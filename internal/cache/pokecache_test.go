@@ -63,10 +63,7 @@ func TestAddGetCache(t *testing.T) {
 	cache := NewCache(10)
 
 	for _, v := range cases {
-		err := cache.Add(v.key, v.val)
-		if err != nil {
-			t.Errorf("adding failed")
-		}
+		cache.Add(v.key, v.val)
 	}
 
 	for _, v := range cases {

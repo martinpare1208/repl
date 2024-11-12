@@ -34,7 +34,7 @@ func TestInput(t *testing.T) {
 			t.Errorf("lengths don't match: %v vs %v", actual, c.expected)
 			continue
 		}
-		for i, _ := range actual {
+		for i := range actual {
 			letter := actual[i]
 			expectedLetter := c.expected[i]
 			if letter != expectedLetter {

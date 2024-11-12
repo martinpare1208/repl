@@ -14,7 +14,7 @@ import (
 
 func main() {
 	
-	pokeClient := client.NewClient(5*time.Second, 5*time.Minute)
+	pokeClient := client.NewClient(5*time.Second, time.Minute*5)
 
 	fmt.Println("Welcome!")
 	reader := bufio.NewScanner(os.Stdin)

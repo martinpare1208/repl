@@ -15,59 +15,50 @@ type cacheEntry struct {
 
 type Cache struct {
 	cacheMap map[string]cacheEntry // caching
-	mu sync.Mutex // thread safety
-	intervalDur time.Duration // reaping timing
+	mu *sync.Mutex // thread safety
 }
 
 func NewCache(interval time.Duration) Cache{
 	cacheMap := make(map[string]cacheEntry)
 	newCache := Cache{cacheMap: cacheMap,
-	intervalDur: interval,}
-	go newCache.reapLoop()
+	mu: &sync.Mutex{},}
+	go newCache.reapLoop(interval)
 	return newCache
 }
 
-func(c *Cache) reapLoop() {
-	ticker := time.NewTicker(c.intervalDur)
-	defer ticker.Stop()
+func(c *Cache) reapLoop(interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	for range ticker.C {
+		c.reap(time.Now().UTC(), interval)
+}
+}
 
-	for {
-		<-ticker.C
-		cutoff := time.Now().Add(-c.intervalDur)
-		c.mu.Lock()
-		for k, v := range c.cacheMap {
-			if v.createdAt.Before(cutoff) {
-				delete(c.cacheMap, k)
-			}
+func (c *Cache) reap(now time.Time, last time.Duration) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	for k, v := range c.cacheMap {
+		if v.createdAt.Before(now.Add(-last)) {
+			delete(c.cacheMap, k)
 		}
-		c.mu.Unlock()
 	}
 }
 
 
-func(c *Cache) Add(key string, val []byte) (error) {
-
+func(c *Cache) Add(key string, val []byte) () {
+	fmt.Println("ADDING KEY")
 	c.mu.Lock()
-	_, exists := c.Get(key)
-	if exists {
-		return fmt.Errorf("key already exists in cache")
-	}
+	defer c.mu.Unlock()
 
 	c.cacheMap[key] = cacheEntry{
 		createdAt: time.Now(),
 		val: val,
 	}
-	defer c.mu.Unlock()
-	return nil
 }
 
 func(c *Cache) Get(key string) ([]byte, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	data, exists := c.cacheMap[key]
-	if exists {
-		return data.val, true
-	}
-	return nil, false
+	return data.val, exists
 }
 

@@ -12,7 +12,7 @@ import (
 type locationArea struct {
 	Count    int    `json:"count"`
 	Next     string `json:"next"`
-	Previous any    `json:"previous"`
+	Previous string    `json:"previous"`
 	Results  []struct {
 		Name string `json:"name"`
 		URL  string `json:"url"`
@@ -20,13 +20,16 @@ type locationArea struct {
 }
 
 
-func GetLocations(cfg *config.Cfg) (error) {
+func GetLocations(cfg *config.Cfg, url string) (error) {
+
+	
 
 	fullURL := cfg.NextUrl
 
 	if cfg.NextUrl == "" {
 		fullURL = baseURL + "/location-area"
 	}
+
 
 
 	
@@ -51,6 +54,8 @@ func GetLocations(cfg *config.Cfg) (error) {
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
+	
+
 	var locations locationArea
 	decoder := json.NewDecoder(resp.Body)
 	err = decoder.Decode(&locations)
@@ -58,27 +63,53 @@ func GetLocations(cfg *config.Cfg) (error) {
 		return fmt.Errorf("no json data")
 	}
 
+	dat, err := json.Marshal(locations)
+	if err != nil {
+		return err
+	}
+	
+
 	// Get locations of all 20 locations in the paginated result
 	for _, v := range locations.Results {
 		fmt.Println(v.Name)
 	}
 
-	// update cfg url results
-	cfg.CurrentUrl = cfg.NextUrl
-	if locations.Previous != nil {
-		cfg.PrevUrl = locations.Previous.(string)
-	}
-	cfg.NextUrl = locations.Next
-	
 
+	//Add to cache
+	fmt.Println("Adding link to cache")
+	cfg.PokeClient.Cache.Add(fullURL, dat)
+
+
+
+	// update cfg url results
+	cfg.NextUrl = locations.Next
+	cfg.PrevUrl = locations.Previous
 
 	return nil
 }
 
 func GetLocationsB(cfg *config.Cfg) (error) {
+	fmt.Println(cfg.PrevUrl)
+	//Check cache
+	data, exists := cfg.PokeClient.Cache.Get(cfg.PrevUrl)
+
+	if exists {
+		fmt.Println("ACCESSING CACHE, KEY FOUND")
+		var locations *locationArea
+		err := json.Unmarshal(data, &locations)
+		if err != nil {
+			return fmt.Errorf("error: could not reading json")
+		}
+		for _, v := range locations.Results {
+			fmt.Println(v.Name)
+		}
+	} else {
+		fmt.Println("CACHE KEY NOT FOUND")
+	}
+
 
 	if cfg.PrevUrl == "" {
-		return fmt.Errorf("previous page not found")
+		return fmt.Errorf("error: already on first page")
 	}
 
 	// Create get request
@@ -113,13 +144,10 @@ func GetLocationsB(cfg *config.Cfg) (error) {
 		fmt.Println(v.Name)
 	}
 
-	// update cfg url results
-	if locations.Previous != nil {
-		cfg.PrevUrl = locations.Previous.(string)
-		cfg.NextUrl = cfg.CurrentUrl
-	} 
-
-	cfg.CurrentUrl = cfg.PrevUrl
-
+		// update cfg url results
+		cfg.NextUrl = locations.Next
+		cfg.PrevUrl = locations.Previous
+	
 	return nil
 }
+
