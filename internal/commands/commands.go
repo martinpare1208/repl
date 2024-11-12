@@ -87,7 +87,7 @@ func getMap(cfg *config.Cfg) (error) {
 }
 
 func getMapB(cfg *config.Cfg) (error) {
-	err := pokeapi.GetLocationsB(cfg)
+	err := pokeapi.GetLocationsB(cfg, cfg.PrevUrl)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return err

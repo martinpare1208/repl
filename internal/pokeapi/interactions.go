@@ -22,11 +22,29 @@ type locationArea struct {
 
 func GetLocations(cfg *config.Cfg, url string) (error) {
 
+	// Check if url in cache
+
+	data, exists := cfg.PokeClient.Cache.Get(url)
+	if exists {
+		var locationsCache locationArea
+		err := json.Unmarshal(data, &locationsCache)
+		if err == nil {
+			fmt.Println("key found!")
+			for _, v := range locationsCache.Results {
+				fmt.Println(v.Name)
+			}
+			cfg.NextUrl = locationsCache.Next
+			cfg.PrevUrl = locationsCache.Previous
+			return nil
+		}
+
+	}
+
 	
 
-	fullURL := cfg.NextUrl
+	fullURL := url
 
-	if cfg.NextUrl == "" {
+	if url == "" {
 		fullURL = baseURL + "/location-area"
 	}
 
@@ -88,66 +106,11 @@ func GetLocations(cfg *config.Cfg, url string) (error) {
 	return nil
 }
 
-func GetLocationsB(cfg *config.Cfg) (error) {
-	fmt.Println(cfg.PrevUrl)
-	//Check cache
-	data, exists := cfg.PokeClient.Cache.Get(cfg.PrevUrl)
-
-	if exists {
-		fmt.Println("ACCESSING CACHE, KEY FOUND")
-		var locations *locationArea
-		err := json.Unmarshal(data, &locations)
-		if err != nil {
-			return fmt.Errorf("error: could not reading json")
-		}
-		for _, v := range locations.Results {
-			fmt.Println(v.Name)
-		}
-	} else {
-		fmt.Println("CACHE KEY NOT FOUND")
-	}
-
-
-	if cfg.PrevUrl == "" {
+func GetLocationsB(cfg *config.Cfg, url string) (error) {
+	if url == "" {
 		return fmt.Errorf("error: already on first page")
 	}
-
-	// Create get request
-	req, err := http.NewRequest("GET", cfg.PrevUrl, nil)
-	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
-	}
-
-	// Send the request
-	resp, err := cfg.PokeClient.HttpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("failed to perform request: %w", err)
-	}
-
-	
-	//Decode json
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-	}
-
-	var locations locationArea
-	decoder := json.NewDecoder(resp.Body)
-	err = decoder.Decode(&locations)
-	if err != nil {
-		return fmt.Errorf("no json data")
-	}
-
-	// Get locations of all 20 locations in the paginated result
-	for _, v := range locations.Results {
-		fmt.Println(v.Name)
-	}
-
-		// update cfg url results
-		cfg.NextUrl = locations.Next
-		cfg.PrevUrl = locations.Previous
-	
+	GetLocations(cfg, url)
 	return nil
 }
 
