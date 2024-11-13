@@ -25,6 +25,10 @@ func TestInput(t *testing.T) {
 			input: "henlO",
 			expected: []string{"henlo"},
 		},
+		{
+			input: "explore city",
+			expected: []string{"explore", "city"},
+		},
 
 	}
 

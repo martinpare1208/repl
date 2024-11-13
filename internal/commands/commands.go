@@ -13,7 +13,7 @@ import (
 type CliCommand struct {
 	Name string
 	Desc string
-	Callback func(cfg *config.Cfg) error
+	Callback func(cfg *config.Cfg, input string) error
 }
 
 type WrongCommandError struct {
@@ -46,7 +46,7 @@ return map[string]CliCommand{
 	"explore": {
 		Name: "explore",
 		Desc: "explore an area",
-		Callback: getMapB,
+		Callback: getPokemonData,
 	},
 }
 }
@@ -55,13 +55,13 @@ func(c WrongCommandError) Error() string {
 	return fmt.Sprintf("command: '%s' not found: ", c.Command)
 }
 
-func ExitProgram(cfg *config.Cfg) (error) {
+func ExitProgram(cfg *config.Cfg, input string) (error) {
 	fmt.Println("Exiting Program.")
 	os.Exit(0)
 	return nil
 }
 
-func GetHelp(cfg *config.Cfg) (error) {
+func GetHelp(cfg *config.Cfg, input string) (error) {
 
 	fmt.Println("Commands below: ")
 	fmt.Println()
@@ -71,22 +71,22 @@ func GetHelp(cfg *config.Cfg) (error) {
 	return nil
 }
 
-func ReadCommand(command string, cfg *config.Cfg) error {
+func ReadCommand(command string, cfg *config.Cfg, input string) error {
 	for c := range getCommands() {
 		if command == c {
-			getCommands()[command].Callback(cfg)
+			getCommands()[command].Callback(cfg, input)
 			return nil
 		} 
 	}
 	return WrongCommandError{Command: command}
 }
 
-func getMap(cfg *config.Cfg) (error) {
+func getMap(cfg *config.Cfg, input string) (error) {
 	pokeapi.GetLocations(cfg, cfg.NextUrl)
 	return nil
 }
 
-func getMapB(cfg *config.Cfg) (error) {
+func getMapB(cfg *config.Cfg, input string) (error) {
 	err := pokeapi.GetLocationsB(cfg, cfg.PrevUrl)
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -95,3 +95,10 @@ func getMapB(cfg *config.Cfg) (error) {
 	return nil
 }
 
+func getPokemonData(cfg *config.Cfg, location string) (error) {
+	err := pokeapi.GetPokemonInArea(cfg, location)
+	if err != nil {
+		return err
+	}
+	return nil
+}

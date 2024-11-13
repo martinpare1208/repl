@@ -25,6 +25,7 @@ func main() {
 	// Create a REPL loop
 	for {
 		var command string
+		var input string
 		fmt.Print("Pokedex > ")
 		reader.Scan()
 
@@ -33,9 +34,16 @@ func main() {
 			continue
 		}
 
+		input = ""
+		
+		if len(words) == 2 {
+			input = words[1]
+		}
+
 		command = words[0]
+		
 	
-		err := commands.ReadCommand(command, clientCfg)
+		err := commands.ReadCommand(command, clientCfg, input)
 		if err != nil {
 			fmt.Println(err)
 		}

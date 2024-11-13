@@ -20,6 +20,60 @@ type locationArea struct {
 }
 
 
+type locationAreaInformation struct {
+	EncounterMethodRates []struct {
+		EncounterMethod struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"encounter_method"`
+		VersionDetails []struct {
+			Rate    int `json:"rate"`
+			Version struct {
+				Name string `json:"name"`
+				URL  string `json:"url"`
+			} `json:"version"`
+		} `json:"version_details"`
+	} `json:"encounter_method_rates"`
+	GameIndex int `json:"game_index"`
+	ID        int `json:"id"`
+	Location  struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"location"`
+	Name  string `json:"name"`
+	Names []struct {
+		Language struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"language"`
+		Name string `json:"name"`
+	} `json:"names"`
+	PokemonEncounters []struct {
+		Pokemon struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"pokemon"`
+		VersionDetails []struct {
+			EncounterDetails []struct {
+				Chance          int   `json:"chance"`
+				ConditionValues []any `json:"condition_values"`
+				MaxLevel        int   `json:"max_level"`
+				Method          struct {
+					Name string `json:"name"`
+					URL  string `json:"url"`
+				} `json:"method"`
+				MinLevel int `json:"min_level"`
+			} `json:"encounter_details"`
+			MaxChance int `json:"max_chance"`
+			Version   struct {
+				Name string `json:"name"`
+				URL  string `json:"url"`
+			} `json:"version"`
+		} `json:"version_details"`
+	} `json:"pokemon_encounters"`
+}
+
+
 func GetLocations(cfg *config.Cfg, url string) (error) {
 
 	// Check if url in cache
@@ -40,17 +94,11 @@ func GetLocations(cfg *config.Cfg, url string) (error) {
 
 	}
 
-	
-
 	fullURL := url
 
 	if url == "" {
 		fullURL = baseURL + "/location-area"
 	}
-
-
-
-	
 
 	// Create get request
 	req, err := http.NewRequest("GET", fullURL, nil)
@@ -111,6 +159,43 @@ func GetLocationsB(cfg *config.Cfg, url string) (error) {
 		return fmt.Errorf("error: already on first page")
 	}
 	GetLocations(cfg, url)
+	return nil
+}
+
+func GetPokemonInArea(cfg *config.Cfg, location string) (error) {
+	fullURL := baseURL + "/location-area/" + location
+
+	// Create get request
+	req, err := http.NewRequest("GET", fullURL, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Send request
+	resp, err := cfg.PokeClient.HttpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to perform request: %w", err)
+	}
+
+	
+	//Decode json
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	var locationAreaInformation locationAreaInformation
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&locationAreaInformation)
+	if err != nil {
+		return fmt.Errorf("error: json could not be decoded")
+	}
+
+	for _, v := range locationAreaInformation.PokemonEncounters {
+		fmt.Println(v.Pokemon.Name)
+	}
+
 	return nil
 }
 
