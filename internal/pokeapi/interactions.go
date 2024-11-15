@@ -199,3 +199,41 @@ func GetPokemonInArea(cfg *config.Cfg, location string) (error) {
 	return nil
 }
 
+
+func CatchPokemon(cfg *config.Cfg, pokemon string) (error) {
+
+	fullURL := baseURL + "/pokemon/" + pokemon
+
+	//Create get request
+	req, err := http.NewRequest("GET", fullURL, nil)
+
+	if err != nil {
+		return err
+	}
+
+	//Send get request
+	resp, err := cfg.PokeClient.HttpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("error: could not complete request: %w", err)
+	}
+
+	defer resp.Body.Close()
+
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("error: unexpected status code %d", resp.StatusCode)
+	}
+
+	var pokemonInfo Pokemon
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&pokemonInfo)
+	if err != nil {
+		return fmt.Errorf("could not decode json")
+	}
+
+	fmt.Printf("You threw a pokeball at %s", pokemon)
+	fmt.Println("")
+
+
+	return nil
+}

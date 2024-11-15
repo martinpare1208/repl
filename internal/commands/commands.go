@@ -6,6 +6,7 @@ import (
 
 	"github.com/martinpare1208/pokedexcli/internal/config"
 	"github.com/martinpare1208/pokedexcli/internal/pokeapi"
+
 )
 
 
@@ -48,6 +49,11 @@ return map[string]CliCommand{
 		Desc: "explore an area",
 		Callback: getPokemonData,
 	},
+	"catch": {
+		Name: "catch",
+		Desc: "catch a pokemon",
+		Callback: catchPokemon,
+	},
 }
 }
 
@@ -82,7 +88,11 @@ func ReadCommand(command string, cfg *config.Cfg, input string) error {
 }
 
 func getMap(cfg *config.Cfg, input string) (error) {
-	pokeapi.GetLocations(cfg, cfg.NextUrl)
+	err := pokeapi.GetLocations(cfg, cfg.NextUrl)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
 	return nil
 }
 
@@ -98,6 +108,16 @@ func getMapB(cfg *config.Cfg, input string) (error) {
 func getPokemonData(cfg *config.Cfg, location string) (error) {
 	err := pokeapi.GetPokemonInArea(cfg, location)
 	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+func catchPokemon(cfg *config.Cfg, pokemonName string) (error) {
+	err := pokeapi.CatchPokemon(cfg, pokemonName)
+	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 	return nil
