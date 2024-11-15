@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/martinpare1208/pokedexcli/internal/config"
+	"github.com/martinpare1208/pokedexcli/internal/pokedex"
 )
 
 // json to go struct
@@ -224,7 +225,7 @@ func CatchPokemon(cfg *config.Cfg, pokemon string) (error) {
 		return fmt.Errorf("error: unexpected status code %d", resp.StatusCode)
 	}
 
-	var pokemonInfo Pokemon
+	var pokemonInfo pokedex.Pokemon
 	decoder := json.NewDecoder(resp.Body)
 	err = decoder.Decode(&pokemonInfo)
 	if err != nil {
@@ -237,10 +238,29 @@ func CatchPokemon(cfg *config.Cfg, pokemon string) (error) {
 	if catch {
 		fmt.Printf("You caught %s!", pokemon)
 		fmt.Println()
+		_, exists := cfg.PokeClient.ClientPokedex[pokemon]
+		if exists {
+			fmt.Println("You already caught this pokemon good job!")
+			return nil
+		}
+
+		// Add to pokedex
+		fmt.Println("Adding to your pokedex!")
+		cfg.PokeClient.ClientPokedex[pokemon] = pokemonInfo
+
 	} else {
 		fmt.Println("Catch failed! Try again!")
 	}
 
 
+
+	return nil
+}
+
+
+func PrintCurrentPokedex(cfg *config.Cfg) (error) {
+	for _, v := range cfg.PokeClient.ClientPokedex {
+		fmt.Println(v.Name)
+	}
 	return nil
 }
