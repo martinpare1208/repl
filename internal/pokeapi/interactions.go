@@ -232,7 +232,14 @@ func CatchPokemon(cfg *config.Cfg, pokemon string) (error) {
 	}
 
 	fmt.Printf("You threw a pokeball at %s", pokemon)
-	fmt.Println("")
+	fmt.Println()
+	catch := GenerateSuccessRate(pokemonInfo.BaseExperience)
+	if catch {
+		fmt.Printf("You caught %s!", pokemon)
+		fmt.Println()
+	} else {
+		fmt.Println("Catch failed! Try again!")
+	}
 
 
 	return nil
