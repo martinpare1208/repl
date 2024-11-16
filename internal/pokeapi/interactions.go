@@ -258,6 +258,22 @@ func CatchPokemon(cfg *config.Cfg, pokemon string) (error) {
 }
 
 
+func InspectPokemonInPokedex(cfg *config.Cfg, pokemonName string) (error) {
+	for _, v := range cfg.PokeClient.ClientPokedex {
+		if pokemonName == v.Name {
+			fmt.Printf("Name: %s\n", v.Name)
+			fmt.Printf("Height: %d\n", v.Height)
+			fmt.Printf("Weight: %d\n", v.Weight)
+			fmt.Println("Stats:")
+			for _, value := range v.Stats {
+				fmt.Printf("\t-%s: %d\n",value.Stat.Name, value.BaseStat)
+			}
+			return nil
+		} 
+	}
+	return fmt.Errorf("you have not caught this pokemon yet")
+}
+
 func PrintCurrentPokedex(cfg *config.Cfg) (error) {
 	for _, v := range cfg.PokeClient.ClientPokedex {
 		fmt.Println(v.Name)

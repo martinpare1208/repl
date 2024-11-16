@@ -54,6 +54,11 @@ return map[string]CliCommand{
 		Desc: "catch a pokemon",
 		Callback: catchPokemon,
 	},
+	"inspect": {
+		Name: "inspect",
+		Desc: "inspect a pokemon",
+		Callback: inspectPokemon,
+	},
 }
 }
 
@@ -116,6 +121,16 @@ func getPokemonData(cfg *config.Cfg, location string) (error) {
 
 func catchPokemon(cfg *config.Cfg, pokemonName string) (error) {
 	err := pokeapi.CatchPokemon(cfg, pokemonName)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+
+func inspectPokemon(cfg *config.Cfg, pokemonName string) (error) {
+	err := pokeapi.InspectPokemonInPokedex(cfg, pokemonName)
 	if err != nil {
 		fmt.Println(err)
 		return err
